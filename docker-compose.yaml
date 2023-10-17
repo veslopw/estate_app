@@ -1,0 +1,45 @@
+version: "3.5"
+services:
+  frontend:
+    container_name: front-end
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: test/front-end
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
+    networks:
+      - node-network
+  backend:
+    container_name: back-end
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: test/back-end
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server:/usr/src/app
+    command: npm run start
+    networks:
+      - node-network
+  nginx:
+    build:
+      context: nginx
+    container_name: nginx
+    restart: always
+    tty: true
+    ports:
+      - "8080:80"
+    networks:
+      - node-network
+    depends_on:
+      - backend
+      - frontend
+networks:
+  node-network:
+    driver: bridge
